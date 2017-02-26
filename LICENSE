@@ -1,6 +1,10 @@
 The MIT License (MIT)
 
-Copyright (c) 2015 Alex Sofronie
+Copyright (c) 2017 Alexis Hildebrandt
+
+This work, "WirksamesDesign\Laravel-MySQL-Uuid", is a derivative of "Alsofronie\Uuid"
+by Alex Sofronie <alsofronie@gmail.com>, used under MIT.
+"WirksamesDesign\Laravel-MySQL-Uuid" is licensed under MIT BY by Alexis Hildebrandt.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

@@ -13,7 +13,13 @@ The binary values are transformed to a properly-formatted string in your models 
 
 ## Installation
 ######This package is in it's infancy so use with caution.
+First add the package with composer:
+
 	composer require wirk/laravel-uuid:dev-master
+
+Next add the following line to your providers array in config/app.php
+
+    WirksamesDesign\LaravelUuid\Database\DatabaseServiceProvider::class,
 
 ### Usage
 
@@ -110,7 +116,7 @@ So, the migration should be something like this:
 
 ## Running tests
 
-I need to write some new tests as parts of alsofronie's original code have moved to different places and more code was added.
+I need to write some new tests as parts of Alsofronie's original code have moved to different places and more code was added.
 
 
 ## Contributing
