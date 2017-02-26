@@ -1,73 +1,103 @@
-# eloquent-uuid
-An Eloquent UUID Trait to use with Laravel 5.1, 5.2 and 5.3.
+# laravel-uuid
 
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/hyperium/hyper/master/LICENSE)
 
-It **should** work with Laravel 5.0 also, but it's untested.
+Custom Laravel 5.4 MySQL driver for use with `BINARY(16)` UUIDs. It automatically detects columns in queries and results but it can be finely tuned to your needs.
 
-The trait overwrites the static `boot` method and listens to the `creating`
-event. It generates a UUID (strips the dashes) and stores it in the primary
-key attribute. Thus, you'll need a `CHAR(32)` primary key for your model
-(see migrations below).
+It **might** work previous minor versions of Laravel 5, let me know if you have successfully used it. Can only be used with MySQL.
+
+Supports Eloquent Models and the Query Builder and handles foreign keys correctly, including for m:n (many to many) relations. 
+
+The binary values are transformed to a properly-formatted string in your models and collections so you always see the readable value for all UUID-fields. When updating a record, just pass back the string value for any foreign keys or other binary uuid fields you might have. 
+
 
 ## Installation
+######This package is in it's infancy so use with caution.
+	composer require wirk/laravel-uuid:dev-master
 
-	composer require alsofronie/eloquent-uuid:dev-master
+### Usage
 
-## Use
-
-In order to make it faster, you have the option to use one of three traits:
-
- - `UuidModelTrait` - the key must be `CHAR(36)` and contains the dashes
- - `Uuid32ModelTrait` - the key must be `CHAR(32)`, the dashes are stripped
- - `UuidBinaryModelTrait` - the key is `BINARY(16)`.
-
-#### Using `UuidModelTrait`
-
-In order to use this trait, your **schema** must be something like:
+The `UuidBinaryModelTrait` enables your model to generate primary keys correctly. Use it in every model that has one or more `BINARY(16)` UUID columns. 
 
 ```
 <?php
-	// ...
-	Schema::create('users', function (Blueprint $table) {
-		$table->uuid('id');	// this will create a CHAR(36) field
-		// or
-		// $table->char('id', 36);
-		$table->string('username', 32);
-		$table->string('password', 50);
-		// ...
-		$table->primary('id');
-	});
+
+namespace App;
+
+use WirksamesDesign\LaravelUuid\Database\Traits\UuidBinaryModelTrait
+
+class Team extends Model
+{
+    use UuidBinaryModelTrait;
+}
 ```
 
-#### Using `Uuid32ModelTrait`
-
-For this type, just use `CHAR(32)` in your schema (this is identical to the first one, but with stripped dashes).
-
+### Configuration (optional)
+The driver mostly does all the work for you. You can however create custom configurations for each model or even for specific fields. To do so, create a static array `uuidSettings` in your model class. You can also use a base model class to change the behaviour globally.
+ ```php
+     public static $uuidSettings = [];
 ```
-<?php
-	// ...
-	Schema::create('users', function (Blueprint $table) {
-		$table->char('id', 32);
-		// ...
-		$table->string('username', 32);
-		$table->string('password', 50);
+#### Optimizing the binary stored UUIDs for sorting
+The bits of your binary UUIDs can be re-arranged to allow sorting by creation date.
+######Warning: use only on new models that don't contain any data yet.
 
-		$table->primary('id');
-	});
+[Learn how the optimization works](https://www.percona.com/blog/2014/12/19/store-uuid-optimized-way/) 
+
+ ```php
+     public static $uuidSettings = [
+        'optimize' => true
+     ];
+```
+#### Changing the version of the uuids
+ ```php
+     public static $uuidSettings = [
+        'version' => 1
+     ];
 ```
 
-#### Using `UuidBinaryModelTrait`
+#### Disabling auto-detection of columns
+ ```php
+     public static $uuidSettings = [
+        'detectColumns' => false,
+     ];
+```
 
-This stores the key as binary. The default Laravel `Blueprint` curretly
+#### Per-column configuration
+You don't have to register your columns as they are auto-detected but you can override all settings for a specific column. These will override any base settings for the model.
+ ```php
+     public static $uuidSettings = [
+       'version'        => 4,
+       'optimize'       => false,
+       'columns'        => [
+            'id'              => ['version' => 5, 'optimize' => true],
+            'cant_touch_this' => ['detectColumns' => false]
+        ]
+     ];
+```
+
+##### Auto-generate UUIDs
+By default, the primary key column is automatically filled with a new UUID on insert. You can disable this behaviour if you are creating your own primary keys or add it to any other field.
+ ```php
+     public static $uuidSettings = [
+        'columns' => [
+            'id'        => ['generateOnInsert' => false],
+            'nonce'     => ['generateOnInsert' => true]
+        ]
+     ];
+```
+
+
+
+
+### Migrations
+The default Laravel `Blueprint` 
 [does not currently support binary fields with specified length](https://github.com/laravel/framework/issues/1606),
 and (at least in MySQL) you cannot create an index (including primary key) on a `BINARY` field without length.
 
-So, the schema definition should be something like this (please double check if you're not using MySQL):
+So, the migration should be something like this:
 
 ```
 <?php
-
 	// ...
 	Schema::create('users', function (Blueprint $table) {
 		$table->string('username', 32);
@@ -78,32 +108,10 @@ So, the schema definition should be something like this (please double check if 
 ?>
 ```
 
-There are two additional notes for this particular trait.
-
-> Note 1. In order to get a string representation of your uuid, simple call `$model->id_string` and you'll get it.
-
-> Note 2. You can use `User::find($uuid)` with both the binary version or the string (bin2hex) version.
-
-##### Using the optimized uuid
-To use the optimized uuid, put the following line in your models:
-`private static $uuidOptimization = true;`
-
-#### In your models
-
-In order to use this in your models, just put `use Uuid[32|Binary]ModelTrait;`:
-
-```
-<?php
-
-namespace App;
-use Alsofronie\Uuid\Uuid[32|Binary]ModelTrait;
-
-class User extends Eloquent
-{
-	use Uuid[32|Binary]ModelTrait;
-}
-```
-
 ## Running tests
 
-To run the tests, just run `composer install` and `./vendor/bin/phpunit`.
+I need to write some new tests as parts of alsofronie's original code have moved to different places and more code was added.
+
+
+## Contributing
+Please submit any bugs you encounter or create a PR. Or maybe you want to write some tests? ;-)

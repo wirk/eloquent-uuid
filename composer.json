@@ -1,29 +1,32 @@
 {
-    "name": "alsofronie/eloquent-uuid",
-    "description": "A Laravel Eloquent Model trait for using UUID's as primary keys",
+    "name": "wirk/laravel-uuid",
+    "description": "Custom Laravel 5 MySQL driver for use with BINARY(16) UUIDs. It automatically detects UUID columns but it can be finely tuned. Also supports m:n relations.",
     "type": "library",
     "require": {
         "webpatser/laravel-uuid": "2.*"
     },
     "require-dev": {
-        "laravel/framework": "^5.1.0",
+        "laravel/framework": "^5.4.0",
         "phpunit/phpunit": "~4.0"
     },
     "license": "MIT",
     "authors": [
         {
+            "name": "Alexis Hildebrandt",
+            "email": "Alexis.Hildebrandt@wirksames-design.de"
+        }, {
             "name": "Alex Sofronie",
             "email": "alsofronie@gmail.com"
         }
     ],
     "support": {
-        "issues": "https://github.com/alsofronie/eloquent-uuid/issues",
-        "source": "https://github.com/alsofronie/eloquent-uuid"
+        "issues": "https://github.com/wirk/laravel-uuid/issues",
+        "source": "https://github.com/wirk/laravel-uuid"
     },
     "minimum-stability": "stable",
     "autoload": {
         "psr-4": {
-            "Alsofronie\\Uuid\\": "src/"
+            "WirksamesDesign\\LaravelUuid\\": "src/"
         }
     }
 }
